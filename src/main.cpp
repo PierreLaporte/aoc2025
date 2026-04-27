@@ -1,6 +1,6 @@
 #include <iostream>
 #include "../include/utils.hpp"
-#include "day2.hpp"
+#include "../include/day2.hpp"
 
 int main(int argc, char *argv[])
 {
