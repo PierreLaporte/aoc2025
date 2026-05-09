@@ -4,57 +4,81 @@
 
 class Positions{
     private:
-        int m_nb_rows = 0;
-        int m_nb_cols = 0;
-        int m_accessible_sum = 0;
-        std::vector<std::vector<bool>> grid;
+        size_t m_nb_rows = 0;
+        size_t m_nb_cols = 0;
+        size_t m_accessible_sum = 0;
+        size_t m_removable_sum  = 0;
+        std::vector<bool> m_grid;
+
+        [[nodiscard]] size_t idx(int row, int col) const {
+            return row*m_nb_cols + col;
+        }
 
     public:
-        Positions(const std::vector<std::string> & raw_positions) {
-            int nb_raw_lines = raw_positions.size();
-            int nb_raw_cols = raw_positions[0].size();
+        Positions(const std::vector<std::string> & raw_positions) :
+        m_nb_rows(raw_positions.size()+2), 
+        m_nb_cols(raw_positions[0].size()+2) 
+        {
+            m_grid.assign(m_nb_rows*m_nb_cols,  false);
 
-            grid.assign(nb_raw_lines + 2, std::vector<bool>(nb_raw_cols + 2, false));
-            m_nb_rows = nb_raw_lines + 2;
-            m_nb_cols = nb_raw_cols + 2;
-
-            for (int row = 0; row < nb_raw_lines; row++) {
-                for(int col = 0; col < nb_raw_cols; col++){
+            for (size_t row = 0; row < raw_positions.size(); row++) {
+                for(size_t col = 0; col < raw_positions[0].size(); col++){
                     if (raw_positions[row][col] == '@'){
-                        grid[row+1][col+1] = true;
+                        m_grid[idx(row+1, col+1)] = true;
                     }
                 } 
             }
 
-            for (int i = 1; i < m_nb_rows-1; i++){
-                for (int j = 1; j < m_nb_cols-1; j++){
-                    if (grid[i][j] && is_accessible(i,j)) m_accessible_sum++;
+            compute_accessible_sum();
+        }
+
+        void compute_accessible_sum(){
+            for (size_t i = 1; i < m_nb_rows-1; i++){
+                for (size_t j = 1; j < m_nb_cols-1; j++){
+                    if (is_accessible(i,j)) m_accessible_sum++;
                 }
             }
         }
 
-        bool is_accessible(int i, int j) const{
-            int adjacent = grid[i-1][j-1] + grid[i-1][j] + grid[i-1][j+1] + 
-            grid[i][j-1] + grid[i][j+1] + 
-            grid[i+1][j-1] + grid[i+1][j] + grid[i+1][j+1];
+        bool is_accessible(size_t i, size_t j) const{
+            if (!m_grid[idx(i,j)]) return false;
+            int adjacent = m_grid[idx(i-1, j-1)] + m_grid[idx(i-1,j)] + m_grid[idx(i-1, j+1)] + 
+            m_grid[idx(i, j-1)] + m_grid[idx(i,j+1)] + 
+            m_grid[idx(i+1, j-1)] + m_grid[idx(i+1,j)] + m_grid[idx(i+1, j+1)];
             return adjacent < 4;
         }
 
         void display() const{
-            for (int row = 0; row < m_nb_rows; row++){
-                for(int col = 0; col < m_nb_cols; col++){
-                    if (grid[row][col]) {
-                        if (is_accessible(row,col)) std::cout << "A" ;else std::cout << "X";
+            for (size_t row = 0; row < m_nb_rows; row++){
+                for(size_t col = 0; col < m_nb_cols; col++){
+                    if (m_grid[idx(row, col)]) {
+                        std::cout << (is_accessible(row, col) ? "A" : "X") ;
                     } else {
                         std::cout << ".";
                     }
                 }
-                std::cout << std::endl;
+                std::cout << '\n';
             }
         }
 
-        int accessible_sum() const{
+        size_t accessible_sum() const{
             return m_accessible_sum;
+        }
+
+        size_t removable_sum() const{
+            return m_removable_sum;
+        }
+
+        void remove_accessible_rolls(){
+            for (size_t i = 1; i < m_nb_rows-1; i++){
+                for (size_t j = 1; j < m_nb_cols-1; j++){
+                    if (is_accessible(i,j)) 
+                    {
+                        m_grid[idx(i,j)] = false; 
+                        m_removable_sum++;
+                    }
+                }
+            }
         }
 };
 
@@ -63,13 +87,22 @@ void Day4::solve(){
     std::vector<std::string> raw_positions = utils::read_input("inputs/4.txt");
     if (raw_positions.size() < 1)
     {
-        std::cerr << "input is empty" << std::endl;
+        std::cerr << "input is empty" << '\n';
         std::exit(1);
     }
 
     Positions positions = Positions(raw_positions);
     positions.display();
-    size_t sum_second_part = 0;
-    std::cout << "part 1: sum = " << positions.accessible_sum() << std::endl;
-    std::cout << "part 2: sum = " << sum_second_part << std::endl;
+    std::cout << "initially accessible rolls = " << positions.accessible_sum() << '\n';
+
+    size_t previous_nb_removable = 0;
+    positions.remove_accessible_rolls();
+    while (positions.removable_sum() != previous_nb_removable){
+        std::cout << "=================================" << '\n';
+        positions.display();
+        previous_nb_removable = positions.removable_sum();
+        positions.remove_accessible_rolls();
+    }
+
+    std::cout << "number of removable rolls = " << positions.removable_sum() << '\n';
 }
