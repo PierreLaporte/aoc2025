@@ -2,7 +2,7 @@
 #include <set>
 #include "../include/utils.hpp"
 #include <charconv>
-#include "../include/day2.hpp"
+#include "../include/days.hpp"
 
 bool is_fake_first_criteria(std::string_view id)
 {

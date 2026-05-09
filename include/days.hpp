@@ -12,3 +12,17 @@ public:
     Day2() = default;
     void solve();
 };
+
+class Day3
+{
+public:
+    Day3() = default;
+    void solve();
+};
+
+class Day4
+{
+public:
+    Day4() = default;
+    void solve();
+};

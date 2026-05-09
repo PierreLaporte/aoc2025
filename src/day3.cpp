@@ -1,7 +1,7 @@
 #include <iostream>
 #include <set>
 #include "../include/utils.hpp"
-#include "../include/day3.hpp"
+#include "../include/days.hpp"
 #include <format>
 
 size_t first_part(std::string_view bank){
