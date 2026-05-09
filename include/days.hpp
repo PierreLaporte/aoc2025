@@ -26,3 +26,10 @@ public:
     Day4() = default;
     void solve();
 };
+
+class Day5
+{
+public:
+    Day5() = default;
+    void solve();
+};

@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <format>
 
 namespace utils
 {
@@ -17,7 +18,7 @@ namespace utils
 
         std::vector<std::string> lines{};
         std::string line{};
-        while (input_file >> line)
+        while (std::getline(input_file, line))
         {
             lines.push_back(line);
         }
@@ -40,5 +41,9 @@ namespace utils
         }
 
         return output;
+    }
+
+    std::string print_range(const std::pair<size_t, size_t>& range) {
+        return std::format("[{}, {}]", range.first, range.second);
     }
 }

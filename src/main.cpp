@@ -31,6 +31,12 @@ int main(int argc, char *argv[])
         solver.solve();
         break;
     }
+    case 5:
+    {
+        Day5 solver;
+        solver.solve();
+        break;
+    }
     default:
         std::cout << "this day is not implemented yet :(" << std::endl;
     }
