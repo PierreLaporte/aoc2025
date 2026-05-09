@@ -1,6 +1,7 @@
 #include <iostream>
 #include "../include/utils.hpp"
 #include "../include/day2.hpp"
+#include "../include/day3.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,12 @@ int main(int argc, char *argv[])
     case 2:
     {
         Day2 solver;
+        solver.solve();
+        break;
+    }
+    case 3:
+    {
+        Day3 solver;
         solver.solve();
         break;
     }
