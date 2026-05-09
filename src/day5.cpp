@@ -10,7 +10,7 @@ class IngredientList{
         std::vector<size_t> m_ingredients;
 
     public:
-        IngredientList(std::vector<std::string> input){
+        IngredientList(const std::vector<std::string> & input){
             // handle ranges
             size_t break_index = 0;
             for(size_t i = 0; i < input.size(); i++){
@@ -33,49 +33,41 @@ class IngredientList{
 
         void display_ranges() const{
             std::cout << "================== " << m_ranges.size() << " FRESH RANGES =================" << '\n';
-            for (auto range: m_ranges){
+            for (const auto & range: m_ranges){
                 std::cout << utils::print_range(range) << "\n"; 
             }
             std::cout << '\n';
         }
 
-        size_t nb_ranges(){
+        size_t nb_ranges() const {
             return m_ranges.size();
         }
 
         void merge_ranges(){
-            // std::cout << "=========== MERGING " << m_ranges.size() << " RANGES ==============" << std::endl; 
+            std::ranges::sort(m_ranges, [](const auto& a, const auto& b) {
+                if (a.first != b.first) return a.first < b.first;
+                return a.second > b.second; 
+            });
             std::vector<std::pair<size_t,size_t>> new_ranges;
-            size_t i = 0;
-            bool merged = false;
-            while (i < m_ranges.size()-1){
-                if (m_ranges[i].second >= m_ranges[i+1].first-1){
-                    std::pair<size_t,size_t> new_range;
-                    if (m_ranges[i].second >= m_ranges[i+1].second){
-                        new_range = {m_ranges[i].first, m_ranges[i].second};
-                    } else{
-                        new_range = {m_ranges[i].first, m_ranges[i+1].second};
-                    }
-                    // std::cout << "merging ranges " << utils::print_range(m_ranges[i]) << " and " << utils::print_range(m_ranges[i+1]) << " ===> " << utils::print_range(new_range) << std::endl;
-                    new_ranges.emplace_back(new_range);
-                    i+=2;
-                    merged = true;
-                } else {
-                    new_ranges.emplace_back(m_ranges[i]);
-                    i++;
-                    merged = false;
+            new_ranges.reserve(m_ranges.size());
+            new_ranges.push_back(m_ranges[0]);    
+        
+            for (size_t i = 1; i < m_ranges.size(); i++){
+                auto& last = new_ranges.back();
+                auto& current = m_ranges[i];
+
+                if (current.first <= last.second + 1){
+                    last.second = std::max(last.second, current.second);
+                } else{
+                    new_ranges.push_back(current);
                 }
             }
-            if (!merged){
-                new_ranges.emplace_back(m_ranges[m_ranges.size()-1]);
-            }
-            m_ranges = new_ranges;
-            std::ranges::sort(m_ranges);
+            m_ranges = std::move(new_ranges);
         }
         
-        size_t count_fresh_ingredients(){
+        size_t count_fresh_ingredients() const {
             size_t count = 0;
-            for(auto ingredient: m_ingredients){
+            for(const auto & ingredient: m_ingredients){
                 if (is_fresh(ingredient)) {
                     count++;
                 }
@@ -83,21 +75,22 @@ class IngredientList{
             return count;
         }
 
-        size_t count_all_possible_fresh_ingredients(){
+        size_t count_all_possible_fresh_ingredients() const{
             size_t count = 0;
-            for(auto range: m_ranges){
+            for(const auto & range: m_ranges){
                 count += (range.second - range.first) + 1;
             }
             return count;
         }
 
-        bool is_fresh(size_t ingredient){
-            for (auto range: m_ranges){
-                if (ingredient >= range.first && ingredient <= range.second){
-                    return true;
-                }
-            }
-            return false;
+        bool is_fresh(size_t ingredient) const{
+            // Trouve le premier intervalle dont la fin >= ingredient
+            auto it = std::lower_bound(m_ranges.begin(), m_ranges.end(), ingredient, 
+                [](const std::pair<size_t, size_t>& range, size_t val) {
+                    return range.second < val;
+                });
+
+            return it != m_ranges.end() && ingredient >= it->first;
         }
 };
 
@@ -112,11 +105,7 @@ void Day5::solve(){
     }
     IngredientList ingredient_list = IngredientList(input);
     ingredient_list.display_ranges();
-    size_t prev_nb_ranges = 0;
-    while (ingredient_list.nb_ranges() != prev_nb_ranges){
-        prev_nb_ranges = ingredient_list.nb_ranges();
-        ingredient_list.merge_ranges();
-    }
+    ingredient_list.merge_ranges();
     ingredient_list.display_ranges();
     std::cout << "fresh ingredients = " << ingredient_list.count_fresh_ingredients() << std::endl;
     std::cout << "all possible fresh ingredients = " << ingredient_list.count_all_possible_fresh_ingredients() << std::endl;
