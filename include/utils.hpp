@@ -12,9 +12,9 @@ namespace utils
     std::vector<std::string_view> split_fast(std::string_view str, char delimiter);
     std::string print_range(const std::pair<size_t, size_t>& range);
 
-    template <typename T>
-    requires std::is_arithmetic_v<T>
-    T to_number(std::string_view sv){
+    template <typename T, typename StringType>
+    requires std::is_arithmetic_v<T> && std::is_convertible_v<StringType, std::string_view>
+    T to_number(StringType&& sv){
         T value;
         auto [ptr, err] = std::from_chars(sv.data(), sv.data() + sv.size(), value);
 

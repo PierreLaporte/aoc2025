@@ -33,3 +33,25 @@ public:
     Day5() = default;
     void solve();
 };
+
+class Day6
+{
+public:
+    Day6() = default;
+    void solve();
+};
+
+class Day7
+{
+public:
+    Day7() = default;
+    void solve();
+};
+
+
+class Day8
+{
+public:
+    Day8() = default;
+    void solve();
+};
